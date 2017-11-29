@@ -95,15 +95,12 @@ Apify.main(async () => {
     
     const contentType = input.contentType? input.contentType: 'application/json; charset=utf-8'
     
-    const store = await keyValueStores.getOrCreateStore({ storeName: input.outputStore });
-    apifyClient.setOptions({ storeId: store.id });
-    
     if(input.keys && input.keys.length > 0){
         console.log('STARTING EXACT VERSION')
         if(input.copy){
             console.log('STARTING COPY')
             await copyRecords({
-                keys: input.keys, inputStore: input.inputStore, outputStore: store.id,
+                keys: input.keys, inputStore: input.inputStore, outputStore: input.outputStore,
                 inputPrefix: input.inputPrefix, inputPostfix: input.inputPostfix, outputPrefix:input.outputPrefix,
                 outputPostfix: input.outputPostfix, contentType})
         }
@@ -131,7 +128,7 @@ Apify.main(async () => {
         },[])
         if(input.copy){
             console.log('STARTING COPY')
-            await copyRecords({keys: filteredKeys, inputStore: input.inputStore, outputStore: store.id, outputPrefix: input.outputPrefix, outputPostfix: input.outputPostfix, contentType})
+            await copyRecords({keys: filteredKeys, inputStore: input.inputStore, outputStore: input.outputStore, outputPrefix: input.outputPrefix, outputPostfix: input.outputPostfix, contentType})
         }
         if(input.delete){
             console.log('STARTING DELETE')
