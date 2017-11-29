@@ -1,5 +1,5 @@
 { 
-"copy": "false",
+"copy": "true",
 "delete":"false",
 "inputStore": "qMWPLhFH9BAnyhvtS",
 "outputStore": "sZBW9BQ3vgt8KFXJW",
@@ -7,8 +7,8 @@
 "contentType":""
 "inputPrefix":"",
 "inputPostfix": "",
-"outputPrefix":"hovno_",
-"outputPostfix": "_hovno",
+"outputPrefix":"jauje_",
+"outputPostfix": "",
 "searchPrefix": "data_skirt",
 "searchPostfix": "" 
 }

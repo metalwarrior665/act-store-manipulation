@@ -71,8 +71,9 @@ async function copyRecords({keys, inputStore, outputStore, inputPrefix, inputPos
     }
 }
 
-async function deleteRecords (keys, inputStore, outputstore){
+async function deleteRecords (keys, inputStore){
     for(let key of keys){
+        console.log('DELETING KEY: '+key)
         await keyValueStores.deleteRecord({
             storeId:inputStore,
             key: key
@@ -100,12 +101,14 @@ Apify.main(async () => {
     if(input.keys && input.keys.length > 0){
         console.log('STARTING EXACT VERSION')
         if(input.copy){
+            console.log('STARTING COPY')
             await copyRecords({
                 keys: input.keys, inputStore: input.inputStore, outputStore: store.id,
                 inputPrefix: input.inputPrefix, inputPostfix: input.inputPostfix, outputPrefix:input.outputPrefix,
                 outputPostfix: input.outputPostfix, contentType})
         }
         if(input.delete){
+            console.log('STARTING DELETE')
             await deleteRecords(input.keys, input.inputStore, store.id)
         }
     }
@@ -127,10 +130,12 @@ Apify.main(async () => {
            return newArr
         },[])
         if(input.copy){
+            console.log('STARTING COPY')
             await copyRecords({keys: filteredKeys, inputStore: input.inputStore, outputStore: store.id, outputPrefix: input.outputPrefix, outputPostfix: input.outputPostfix, contentType})
         }
         if(input.delete){
-            await deleteRecords(filteredKeys, input.inputStore, store.id)
+            console.log('STARTING DELETE')
+            await deleteRecords(filteredKeys, input.inputStore)
         }  
     }  
 });
