@@ -13,6 +13,7 @@ const INPUT_TYPE = `{
     inputStore: String,
     outputStore: Maybe String,
     keys: Maybe [String],
+    selectAll: Maybe Boolean,
     contentType: Maybe String,
     searchPrefix: Maybe String,
     searchPostfix: Maybe String,
@@ -43,7 +44,7 @@ async function loadAllKeys(inputStore, keys, exclusiveStartKey){
         }
    }
    
-async function copyRecords({keys, inputStore, outputStore, inputPrefix, inputPostfix, outputPrefix, outputPostfix, contentType}){
+async function copyRecords({keys, inputStore, inputPrefix, inputPostfix, outputPrefix, outputPostfix, contentType}){
     for(let key of keys){
         
         if(!outputPrefix) outputPrefix = '' 
@@ -63,7 +64,6 @@ async function copyRecords({keys, inputStore, outputStore, inputPrefix, inputPos
         const outputKey = outputPrefix+key+outputPostfix
         console.log('OUTPUT KEY: '+outputKey)
         await keyValueStores.putRecord({
-            storeId:outputStore,
             key: outputKey,
             contentType,
             body: JSON.stringify(record.body)
@@ -94,13 +94,23 @@ Apify.main(async () => {
     }
     
     const contentType = input.contentType? input.contentType: 'application/json; charset=utf-8'
+
+    let store;
+    if(input.outputStore){
+        store = await keyValueStores.getStore({ storeId: input.outputStore});
+        if(!store){
+            store = await keyValueStores.getOrCreateStore({storeName: input.outputStore})
+        }
+        apifyClient.setOptions({ storeId: store.id });
+    }
+    
     
     if(input.keys && input.keys.length > 0){
         console.log('STARTING EXACT VERSION')
         if(input.copy){
             console.log('STARTING COPY')
             await copyRecords({
-                keys: input.keys, inputStore: input.inputStore, outputStore: input.outputStore,
+                keys: input.keys, inputStore: input.inputStore, 
                 inputPrefix: input.inputPrefix, inputPostfix: input.inputPostfix, outputPrefix:input.outputPrefix,
                 outputPostfix: input.outputPostfix, contentType})
         }
@@ -109,12 +119,15 @@ Apify.main(async () => {
             await deleteRecords(input.keys, input.inputStore, store.id)
         }
     }
-    if(input.searchPrefix || input.searchPostfix){
+    if(input.searchPrefix || input.searchPostfix || input.selectAll){
         console.log('STARING SEARCH VERSION')
         searchPrefix = input.searchPrefix
         searchPostfix = input.searchPostfix
         const allKeys = await loadAllKeys(input.inputStore)
         const filteredKeys = allKeys.reduce((newArr,recordKey) => {
+           if(input.selectAll){
+                return newArr.concat(recordKey.key)
+           }
            if(searchPrefix && !searchPostfix &&recordKey.key.substring(0, searchPrefix.length) === searchPrefix){
                return newArr.concat(recordKey.key)
            }
@@ -128,7 +141,7 @@ Apify.main(async () => {
         },[])
         if(input.copy){
             console.log('STARTING COPY')
-            await copyRecords({keys: filteredKeys, inputStore: input.inputStore, outputStore: input.outputStore, outputPrefix: input.outputPrefix, outputPostfix: input.outputPostfix, contentType})
+            await copyRecords({keys: filteredKeys, inputStore: input.inputStore,  outputPrefix: input.outputPrefix, outputPostfix: input.outputPostfix, contentType})
         }
         if(input.delete){
             console.log('STARTING DELETE')
