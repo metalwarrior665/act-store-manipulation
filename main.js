@@ -106,7 +106,7 @@ Apify.main(async () => {
     let outputStore;
     if(input.outputStore){
         outputStore = await keyValueStores.getStore({ storeId: input.outputStore});
-        if(!store){
+        if(!outputStore){
             outputStore = await keyValueStores.getOrCreateStore({storeName: input.outputStore})
         }
         apifyClient.setOptions({ storeId: outputStore.id });
