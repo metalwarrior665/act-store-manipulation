@@ -115,20 +115,20 @@ Apify.main(async () => {
         if(input.copy){
             console.log('STARTING COPY')
             await copyRecords({
-                keys: input.keys, inputStore: input.inputStore, 
+                keys: input.keys, inputStore, 
                 inputPrefix: input.inputPrefix, inputPostfix: input.inputPostfix, outputPrefix:input.outputPrefix,
                 outputPostfix: input.outputPostfix, contentType})
         }
         if(input.delete){
             console.log('STARTING DELETE')
-            await deleteRecords(input.keys, input.inputStore, store.id)
+            await deleteRecords(input.keys, inputStore, store.id)
         }
     }
     if(input.searchPrefix || input.searchPostfix || input.selectAll){
         console.log('STARING SEARCH VERSION')
         searchPrefix = input.searchPrefix
         searchPostfix = input.searchPostfix
-        const allKeys = await loadAllKeys(input.inputStore)
+        const allKeys = await loadAllKeys(inputStore)
         const filteredKeys = allKeys.reduce((newArr,recordKey) => {
            if(input.selectAll){
                 return newArr.concat(recordKey.key)
@@ -146,11 +146,11 @@ Apify.main(async () => {
         },[])
         if(input.copy){
             console.log('STARTING COPY')
-            await copyRecords({keys: filteredKeys, inputStore: input.inputStore,  outputPrefix: input.outputPrefix, outputPostfix: input.outputPostfix, contentType})
+            await copyRecords({keys: filteredKeys, inputStore,  outputPrefix: input.outputPrefix, outputPostfix: input.outputPostfix, contentType})
         }
         if(input.delete){
             console.log('STARTING DELETE')
-            await deleteRecords(filteredKeys, input.inputStore)
+            await deleteRecords(filteredKeys, inputStore)
         }  
     }  
 });
