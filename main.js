@@ -95,13 +95,18 @@ Apify.main(async () => {
     
     const contentType = input.contentType? input.contentType: 'application/json; charset=utf-8'
 
-    let store;
+    const inputStore = await keyValueStores.getStore({ storeId: input.inputStore});
+    if(!inputStore){
+        throw new Error('Input store not found. Try different id') 
+    }
+
+    let outputStore;
     if(input.outputStore){
-        store = await keyValueStores.getStore({ storeId: input.outputStore});
+        outputStore = await keyValueStores.getStore({ storeId: input.outputStore});
         if(!store){
-            store = await keyValueStores.getOrCreateStore({storeName: input.outputStore})
+            outputStore = await keyValueStores.getOrCreateStore({storeName: input.outputStore})
         }
-        apifyClient.setOptions({ storeId: store.id });
+        apifyClient.setOptions({ storeId: outputStore.id });
     }
     
     
