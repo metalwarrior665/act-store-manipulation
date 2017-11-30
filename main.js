@@ -45,6 +45,7 @@ async function loadAllKeys(inputStore, keys, exclusiveStartKey){
    }
    
 async function copyRecords({keys, inputStore, inputPrefix, inputPostfix, outputPrefix, outputPostfix, contentType}){
+    
     for(let key of keys){
         
         if(!outputPrefix) outputPrefix = '' 
@@ -71,12 +72,14 @@ async function copyRecords({keys, inputStore, inputPrefix, inputPostfix, outputP
     }
 }
 
-async function deleteRecords (keys, inputStore){
+async function deleteRecords (keys, inputStore, inputPrefix, inputPostfix){
+    if(!inputPrefix) inputPrefix = ''
+    if(!inputPostfix) inputPostfix = ''
     for(let key of keys){
         console.log('DELETING KEY: '+key)
         await keyValueStores.deleteRecord({
             storeId:inputStore,
-            key: key
+            key: inputPrefix+key+inputPostfix
         })
     }
 }
@@ -108,7 +111,10 @@ Apify.main(async () => {
         }
         apifyClient.setOptions({ storeId: outputStore.id });
     }
-    
+
+    if(!apifyClient.getOptions().storeId && input.copy){
+        throw new Error('You are trying to copy, but did not specified output store.')
+    }
     
     if(input.keys && input.keys.length > 0){
         console.log('STARTING EXACT VERSION')
@@ -121,7 +127,7 @@ Apify.main(async () => {
         }
         if(input.delete){
             console.log('STARTING DELETE')
-            await deleteRecords(input.keys, inputStore, store.id)
+            await deleteRecords(input.keys, inputStore, input.inputPrefix, input.inputPostfix)
         }
     }
     if(input.searchPrefix || input.searchPostfix || input.selectAll){
