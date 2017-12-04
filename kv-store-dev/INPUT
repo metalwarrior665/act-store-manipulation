@@ -1,14 +1,16 @@
+
 { 
-"copy": "true",
-"delete":"false",
-"inputStore": "qMWPLhFH9BAnyhvtS",
-"outputStore": "sZBW9BQ3vgt8KFXJW",
+"copy": false,
+"delete":true,
+"inputStore": "HdTCcZLH5KaK3zngE",
+"outputStore": "TEST",
 "keys": [],
-"contentType":""
+"selectAll":true,
+"contentType":"",
 "inputPrefix":"",
 "inputPostfix": "",
-"outputPrefix":"jauje_",
+"outputPrefix":"",
 "outputPostfix": "",
-"searchPrefix": "data_skirt",
+"searchPrefix": "",
 "searchPostfix": "" 
 }

@@ -1,6 +1,7 @@
 const Apify = require('apify');
 const ApifyClient = require('apify-client');
 const typeCheck = require('type-check').typeCheck
+require('dotenv').config()
 
 const apifyClient = new ApifyClient({
   userId: process.env.APIFY_USER_ID,
@@ -25,65 +26,6 @@ const INPUT_TYPE = `{
 
 const keyValueStores = apifyClient.keyValueStores;
 
-async function loadAllKeys(inputStore, keys, exclusiveStartKey){
-       const limit = 1000
-       const keysInput = await keyValueStores.listKeys({
-            storeId: inputStore,
-            limit,
-            exclusiveStartKey: exclusiveStartKey
-        })
-        if(!keys){
-            keys = []
-        }
-        keys = keys.concat(keysInput.items)
-        if(keysInput.items.length < limit){
-            return keys
-        }
-        else{
-            return await loadAllKeys(inputStore, keys, keysInput.nextExclusiveStartKey)
-        }
-   }
-   
-async function copyRecords({keys, inputStore, inputPrefix, inputPostfix, outputPrefix, outputPostfix, contentType}){
-    
-    for(let key of keys){
-        
-        if(!outputPrefix) outputPrefix = '' 
-        if(!outputPostfix) outputPostfix = ''
-        if(!inputPrefix) inputPrefix = '' 
-        if(!inputPostfix) inputPostfix = ''
-        
-        console.log('GETTING KEY: '+key)
-        const recordKey = inputPrefix+key+inputPostfix
-        console.log('RECORD KEY: '+recordKey)
-        
-        const record  = await keyValueStores.getRecord({ key : recordKey, storeId: inputStore});
-        if(!record){
-            throw new Error('specified key not found: '+key)
-        }
-        
-        const outputKey = outputPrefix+key+outputPostfix
-        console.log('OUTPUT KEY: '+outputKey)
-        await keyValueStores.putRecord({
-            key: outputKey,
-            contentType,
-            body: JSON.stringify(record.body)
-        })
-    }
-}
-
-async function deleteRecords (keys, inputStore, inputPrefix, inputPostfix){
-    if(!inputPrefix) inputPrefix = ''
-    if(!inputPostfix) inputPostfix = ''
-    for(let key of keys){
-        console.log('DELETING KEY: '+key)
-        await keyValueStores.deleteRecord({
-            storeId:inputStore,
-            key: inputPrefix+key+inputPostfix
-        })
-    }
-}
-
 Apify.main(async () => {
     // Get input of your act
     const input = await Apify.getValue('INPUT');
@@ -98,10 +40,12 @@ Apify.main(async () => {
     
     const contentType = input.contentType? input.contentType: 'application/json; charset=utf-8'
 
-    const inputStore = await keyValueStores.getStore({ storeId: input.inputStore});
+    let inputStore = await keyValueStores.getStore({ storeId: input.inputStore});
     if(!inputStore){
         throw new Error('Input store not found. Try different id') 
     }
+    inputStore = inputStore.id
+    console.log('INPUT STORE: '+inputStore)
 
     let outputStore;
     if(input.outputStore){
@@ -109,14 +53,17 @@ Apify.main(async () => {
         if(!outputStore){
             outputStore = await keyValueStores.getOrCreateStore({storeName: input.outputStore})
         }
+        console.log('SETTING OUTPUT STORE TO ID: '+outputStore.id)
         apifyClient.setOptions({ storeId: outputStore.id });
     }
 
+   
+
     if(!apifyClient.getOptions().storeId && input.copy){
-        throw new Error('You are trying to copy, but did not specified output store.')
+        throw new Error('You are trying to copy, but you did not specified output store.')
     }
     
-    if(input.keys && input.keys.length > 0){
+    if(input.keys && input.keys.length > 0 && !input.selectAll){
         console.log('STARTING EXACT VERSION')
         if(input.copy){
             console.log('STARTING COPY')
@@ -160,3 +107,63 @@ Apify.main(async () => {
         }  
     }  
 });
+
+async function loadAllKeys(inputStore, keys, exclusiveStartKey){
+    console.log('LOADING 1000 KEYS')
+       const limit = 1000
+       const keysInput = await keyValueStores.listKeys({
+            storeId: inputStore,
+            limit,
+            exclusiveStartKey: exclusiveStartKey
+        })
+        if(!keys){
+            keys = []
+        }
+        keys = keys.concat(keysInput.items)
+        if(keysInput.items.length < limit){
+            return keys
+        }
+        else{
+            return await loadAllKeys(inputStore, keys, keysInput.nextExclusiveStartKey)
+        }
+   }
+   
+async function copyRecords({keys, inputStore, inputPrefix, inputPostfix, outputPrefix, outputPostfix, contentType}){
+    for(let key of keys){
+        
+        if(!outputPrefix) outputPrefix = '' 
+        if(!outputPostfix) outputPostfix = ''
+        if(!inputPrefix) inputPrefix = '' 
+        if(!inputPostfix) inputPostfix = ''
+        
+        console.log('GETTING KEY: '+key)
+        const recordKey = inputPrefix+key+inputPostfix
+        console.log('RECORD KEY: '+recordKey)
+        
+        const record  = await keyValueStores.getRecord({ key : recordKey, storeId: inputStore});
+        if(!record){
+            throw new Error('specified key not found: '+key)
+        }
+        
+        const outputKey = outputPrefix+key+outputPostfix
+        console.log('OUTPUT KEY: '+outputKey)
+        await keyValueStores.putRecord({
+            key: outputKey,
+            contentType,
+            body: JSON.stringify(record.body)
+        })
+    }
+}
+
+async function deleteRecords (keys, inputStore, inputPrefix, inputPostfix){
+    if(!inputPrefix) inputPrefix = ''
+    if(!inputPostfix) inputPostfix = ''
+  
+    for(let key of keys){
+        console.log('DELETING KEY: '+key)
+        await keyValueStores.deleteRecord({
+            storeId:inputStore,
+            key: inputPrefix+key+inputPostfix
+        })
+    }
+}
