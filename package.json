@@ -5,11 +5,10 @@
   "dependencies": {
     "apify": "^0.4.32",
     "apify-client": "^0.1.55",
+    "dotenv": "^4.0.0",
     "type-check": "^0.3.2"
   },
-  "devDependencies": {
-    "dotenv": "^4.0.0"
-  },
+  "devDependencies": {},
   "scripts": {
     "test-local": "export APIFY_DEV_KEY_VALUE_STORE_DIR=./kv-store-dev/|| set APIFY_DEV_KEY_VALUE_STORE_DIR=./kv-store-dev/&& node main.js"
   }
