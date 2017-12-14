@@ -10,11 +10,13 @@ Apify utility act that allows you to manipulate records in key-value store. Curr
 There are two main ways to get records that should be manipulated. You can combine both of those.
 * Add "keys" property to input. Act will get records under those keys. You can also add "inputPrefix" and/or "inputPostfix" properties, then act will find just your keys with those added strings. For more information, look at examples. Passing empty array or not passing those properties at all just skips this type of search.
 
-* Add "searchPrefix" and/or "searchPostfix" properties. Act will get all record keys starting and ending with those strings. If both are specified, act gets only record key that match both. Passing empty string or not passing those properties at all just skips this type of search.
+* Add "searchPrefix" and/or "searchPostfix" and/or "searchRegex" properties. Act will get all record keys starting and ending with those strings. If both are specified, act gets only record key that match both. Passing empty string or not passing those properties at all just skips this type of search.
 
 **INPUT**
 
 Input is an `application/json` object with the following properties:
+
+__Be careful when deleting__
 
 ```javascript
 {
