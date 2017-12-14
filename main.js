@@ -18,6 +18,7 @@ const INPUT_TYPE = `{
     contentType: Maybe String,
     searchPrefix: Maybe String,
     searchPostfix: Maybe String,
+    searchRegex: Maybe String,
     inputPrefix: Maybe String,
     inputPostfix: Maybe String,
     outputPrefix: Maybe String,
@@ -36,6 +37,10 @@ Apify.main(async () => {
         console.log('Received input:');
         console.dir(input);
         throw new Error("Received invalid input");
+    }
+    else{
+        console.log('Input:');
+        console.dir(input);
     }
     
     const contentType = input.contentType? input.contentType: 'application/json; charset=utf-8'
@@ -77,25 +82,28 @@ Apify.main(async () => {
             await deleteRecords(input.keys, inputStore, input.inputPrefix, input.inputPostfix)
         }
     }
-    if(input.searchPrefix || input.searchPostfix || input.selectAll){
+    if(input.searchPrefix || input.searchPostfix || input.selectAll || input.searchRegex){
         console.log('STARING SEARCH VERSION')
         searchPrefix = input.searchPrefix
         searchPostfix = input.searchPostfix
         const allKeys = await loadAllKeys(inputStore)
         const filteredKeys = allKeys.reduce((newArr,recordKey) => {
-           if(input.selectAll){
+            if(input.selectAll){
                 return newArr.concat(recordKey.key)
-           }
-           if(searchPrefix && !searchPostfix &&recordKey.key.substring(0, searchPrefix.length) === searchPrefix){
-               return newArr.concat(recordKey.key)
-           }
-           if(!searchPrefix && searchPostfix &&recordKey.key.slice(-searchPostfix.length) === searchPostfix){
-               return newArr.concat(recordKey.key)
-           }
-           if(searchPrefix && searchPostfix && recordKey.key.substring(0, searchPrefix.length) === searchPrefix && recordKey.key.slice(-searchPostfix.length) === searchPostfix ){
-               return newArr.concat(recordKey.key)
-           }
-           return newArr
+            }
+            if(input.searchRegex && recordKey.key.match(new RegExp(input.searchRegex))){
+                return newArr.concat(recordKey.key)
+            }
+            if(searchPrefix && !searchPostfix &&recordKey.key.substring(0, searchPrefix.length) === searchPrefix){
+                return newArr.concat(recordKey.key)
+            }
+            if(!searchPrefix && searchPostfix &&recordKey.key.slice(-searchPostfix.length) === searchPostfix){
+                return newArr.concat(recordKey.key)
+            }
+            if(searchPrefix && searchPostfix && recordKey.key.substring(0, searchPrefix.length) === searchPrefix && recordKey.key.slice(-searchPostfix.length) === searchPostfix ){
+                return newArr.concat(recordKey.key)
+            }
+            return newArr
         },[])
         if(input.copy){
             console.log('STARTING COPY')

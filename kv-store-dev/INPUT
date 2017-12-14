@@ -2,15 +2,16 @@
 { 
 "copy": false,
 "delete":true,
-"inputStore": "HdTCcZLH5KaK3zngE",
-"outputStore": "TEST",
+"inputStore": "Soq9G36aEWj7t9PbH",
+"outputStore": "",
 "keys": [],
-"selectAll":true,
+"selectAll":false,
 "contentType":"",
 "inputPrefix":"",
 "inputPostfix": "",
 "outputPrefix":"",
 "outputPostfix": "",
 "searchPrefix": "",
-"searchPostfix": "" 
+"searchPostfix": "",
+"searchRegex":"\\w+-\\w+_1" 
 }
