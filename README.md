@@ -45,6 +45,9 @@ Input is an `application/json` object with the following properties:
     // If this string if provided, act will get all records ending with this string and manipulating with them. Empty string is the same as not using this option at all.
     searchPostfix: Maybe String,
 
+    // If this string if provided, act will get all records matching this regular expression and manipulating with them. Empty string is the same as not using this option at all. Be careful that this regular expression is passed as string to a new RegExp constructor so you need to escape backslashes.
+    searchRegex: Maybe String,
+
     // This option only works when specifing exact keys with "keys" array property. Act gets records from "keys" array that have this string inserted.
     inputPrefix: Maybe String,
 
@@ -55,7 +58,7 @@ Input is an `application/json` object with the following properties:
     outputPrefix: Maybe String,
 
     // When copying records to output store, you can specify this string that will be appended to stored record key.
-    outputPostfix: Maybe String
+    outputPostfix: Maybe String   
 }
 ```
 
@@ -75,7 +78,8 @@ Example input:
 "outputPrefix":"result-",
 "outputPostfix": "",
 "searchPrefix": "images-",
-"searchPostfix": "-urls" 
+"searchPostfix": "-urls",
+"searchRegex":"" 
 }
 ```
 
